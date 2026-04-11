@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Budget Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .container { max-width: 650px; margin: auto; }
+
+        /* Stats Cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stat-card .number {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        /* Form */
+        .form-box {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .form-box h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            transition: border 0.3s;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        /* Expense List */
+        .expense-item {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exp-left { display: flex; align-items: center; gap: 12px; }
+
+        .exp-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex; align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .exp-title { font-weight: 600; color: #333; font-size: 0.95rem; }
+        .exp-category { font-size: 0.75rem; color: #999; margin-top: 2px; }
+
+        .exp-right { display: flex; align-items: center; gap: 12px; }
+        .exp-amount { font-weight: 700; color: #e74c3c; font-size: 1rem; }
+
+        .delete-btn {
+            width: auto;
+            padding: 6px 14px;
+            background: #fff0f0;
+            color: #e74c3c;
+            border: 1px solid #ffd0d0;
+            font-size: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .delete-btn:hover {
+            background: #e74c3c;
+            color: white;
+            opacity: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            padding: 30px;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Smart Budget Tracker</h1>
+        <p class="subtitle">Track your daily expenses smartly</p>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalAmount">₹0</div>
+                <div class="label">Total Spent</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalCount">0</div>
+                <div class="label">Expenses</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="avgAmount">₹0</div>
+                <div class="label">Average</div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="form-box">
+            <h2>➕ Add New Expense</h2>
+            <div class="input-group">
+                <input type="text" id="expTitle" placeholder="Expense Title" />
+                <input type="number" id="expAmount" placeholder="Amount (₹)" />
+            </div>
+            <select id="expCategory" style="margin-bottom: 12px;">
+                <option value="">Select Category</option>
+                <option value="🍔 Food">🍔 Food</option>
+                <option value="🚗 Travel">🚗 Travel</option>
+                <option value="🛍️ Shopping">🛍️ Shopping</option>
+                <option value="💡 Bills">💡 Bills</option>
+                <option value="🎮 Entertainment">🎮 Entertainment</option>
+                <option value="💊 Health">💊 Health</option>
+                <option value="📚 Education">📚 Education</option>
+                <option value="🏠 Rent">🏠 Rent</option>
+                <option value="📦 Other">📦 Other</option>
+            </select>
+            <button onclick="addExpense()">+ Add Expense</button>
+        </div>
+
+        <!-- List -->
+        <div id="expenseList"></div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:8081/api/expenses';
+
+        const categoryColors = {
+            '🍔 Food': '#FF6B6B',
+            '🚗 Travel': '#4ECDC4',
+            '🛍️ Shopping': '#45B7D1',
+            '💡 Bills': '#FFA07A',
+            '🎮 Entertainment': '#98D8C8',
+            '💊 Health': '#F7DC6F',
+            '📚 Education': '#BB8FCE',
+            '🏠 Rent': '#85C1E9',
+            '📦 Other': '#AAB7B8'
+        };
+
+        async function loadExpenses() {
+            const res = await fetch(API);
+            const data = await res.json();
+            const list = document.getElementById('expenseList');
+            list.innerHTML = '';
+
+            if (data.length === 0) {
+                list.innerHTML = '<div class="empty-state">No expenses yet! Add your first expense above 👆</div>';
+                document.getElementById('totalAmount').textContent = '₹0';
+                document.getElementById('totalCount').textContent = '0';
+                document.getElementById('avgAmount').textContent = '₹0';
+                return;
+            }
+
+            let sum = 0;
+            data.forEach(exp => {
+                sum += exp.amount;
+                const color = categoryColors[exp.category] || '#AAB7B8';
+                const icon = exp.category ? exp.category.split(' ')[0] : '📦';
+                list.innerHTML += `
+                    <div class="expense-item">
+                        <div class="exp-left">
+                            <div class="exp-icon" style="background:${color}22">
+                                ${icon}
+                            </div>
+                            <div>
+                                <div class="exp-title">${exp.title}</div>
+                                <div class="exp-category">${exp.category || 'Other'}</div>
+                            </div>
+                        </div>
+                        <div class="exp-right">
+                            <span class="exp-amount">₹${exp.amount}</span>
+                            <button class="delete-btn" onclick="deleteExpense(${exp.id})">Delete</button>
+                        </div>
+                    </div>`;
+            });
+
+            document.getElementById('totalAmount').textContent = '₹' + sum;
+            document.getElementById('totalCount').textContent = data.length;
+            document.getElementById('avgAmount').textContent = '₹' + Math.round(sum / data.length);
+        }
+
+        async function addExpense() {
+            const title = document.getElementById('expTitle').value;
+            const amount = document.getElementById('expAmount').value;
+            const category = document.getElementById('expCategory').value;
+
+            if (!title || !amount || !category) {
+                alert('Sab fields bharo!');
+                return;
+            }
+
+            await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, amount: parseFloat(amount), category })
+            });
+
+            document.getElementById('expTitle').value = '';
+            document.getElementById('expAmount').value = '';
+            document.getElementById('expCategory').value = '';
+            loadExpenses();
+        }
+
+        async function deleteExpense(id) {
+            await fetch(`${API}/${id}`, { method: 'DELETE' });
+            loadExpenses();
+        }
+
+        loadExpenses();
+    </script>
+</body>
+</html>
