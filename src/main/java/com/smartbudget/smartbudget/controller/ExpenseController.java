@@ -39,3 +39,4 @@ public class ExpenseController {
         return expenseService.updateExpense(id, updatedExpense);
     }
 }
+
